@@ -17,15 +17,54 @@ from .models import User  # noqa: F401  (import registers tables on Base.metadat
 from .routers import meetings, participants
 from .seed import get_default_user, seed_if_empty
 
+# Reads a local .env if present. On a hosting platform the variables are
+# already in the process environment before Python starts, so this is a no-op
+# there — but it must run before any os.getenv() call below.
 load_dotenv()
 
 API_PREFIX = "/api"
+
+LOCAL_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
+# Vercel mints a fresh hostname for every preview deployment, so an
+# exact-match list is always one deploy behind. This covers those without
+# opening the API to arbitrary origins.
+VERCEL_PREVIEW_REGEX = r"https://.*\.vercel\.app"
+
+
+def _allowed_origins() -> list[str]:
+    """Exact-match origins for CORS.
+
+    Accepts `FRONTEND_URL` and an optional comma-separated `EXTRA_ORIGINS`.
+    Trailing slashes are stripped: a browser's `Origin` header never carries
+    one, and CORS matching is an exact string comparison, so
+    "https://example.com/" would silently never match.
+    """
+    origins = list(LOCAL_ORIGINS)
+
+    for raw in (os.getenv("FRONTEND_URL"), os.getenv("EXTRA_ORIGINS")):
+        if not raw:
+            continue
+        for entry in raw.split(","):
+            origin = entry.strip().rstrip("/")
+            if origin:
+                origins.append(origin)
+
+    # dict.fromkeys deduplicates while preserving insertion order.
+    return list(dict.fromkeys(origins))
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     Base.metadata.create_all(bind=engine)
     seed_if_empty()
+
+    # Surfaced in the platform's logs so the resolved list can be confirmed
+    # without hitting an endpoint. flush=True because stdout is block-buffered
+    # when it is not a TTY, which would otherwise delay or swallow this.
+    print(f"[startup] CORS allow_origins: {_allowed_origins()}", flush=True)
+    print(f"[startup] CORS allow_origin_regex: {VERCEL_PREVIEW_REGEX}", flush=True)
+
     yield
 
 
@@ -36,20 +75,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
-def _allowed_origins() -> list[str]:
-    origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
-    frontend_url = os.getenv("FRONTEND_URL")
-    if frontend_url:
-        candidate = frontend_url.rstrip("/")
-        if candidate not in origins:
-            origins.append(candidate)
-    return origins
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins(),
+    allow_origin_regex=VERCEL_PREVIEW_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
