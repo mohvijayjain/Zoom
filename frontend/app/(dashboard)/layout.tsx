@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { UtilityBar } from "@/components/layout/UtilityBar";
 
 /**
  * Shell for every dashboard-side route.
@@ -15,7 +14,6 @@ import { UtilityBar } from "@/components/layout/UtilityBar";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <UtilityBar />
       <Navbar />
 
       <div className="flex min-h-0 flex-1">

@@ -27,12 +27,11 @@ const config: Config = {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       fontSize: {
-        // The utility bar and sidebar sit between Tailwind's xs and sm steps.
+        // Sits between Tailwind's xs and sm steps.
         utility: ["13px", "18px"],
       },
       spacing: {
         sidebar: "250px",
-        utilitybar: "32px",
         navbar: "64px",
       },
     },

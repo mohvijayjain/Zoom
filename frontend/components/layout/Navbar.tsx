@@ -2,7 +2,7 @@ import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar } from "@/components/ui/Avatar";
-import { NAV_ACTIONS, NAV_LINKS } from "@/lib/constants";
+import { NAV_ACTIONS } from "@/lib/constants";
 
 export function Navbar() {
   return (
@@ -15,17 +15,6 @@ export function Navbar() {
           ZOOM
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="whitespace-nowrap text-sm text-zoom-text transition-colors hover:text-zoom-blue"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
 
         <div className="ml-auto flex items-center gap-6">
           {NAV_ACTIONS.map((action) => (
