@@ -4,8 +4,27 @@ A functional clone of the Zoom web app: schedule and host meetings, share an
 invite link, join from a browser with real camera and microphone access, and
 manage participants from inside the meeting room.
 
+**Live app:** https://zoom-umber-ten.vercel.app
+**API docs:** https://zoom-clone-api-kha4.onrender.com/docs
+
+> The backend runs on Render's free tier, which sleeps after ~15 minutes idle.
+> The first request may take up to 50 seconds to wake it — this is the host, not the app.
+
 **Stack:** FastAPI + SQLAlchemy 2.0 + SQLite · Next.js 14 (App Router) +
 TypeScript + Tailwind CSS
+
+---
+
+## Screenshots
+
+| | |
+| :--: | :--: |
+| <img src="docs/screenshots/dashboard.png" width="420" alt="Dashboard" /> | <img src="docs/screenshots/join.png" width="420" alt="Join meeting" /> |
+| **Dashboard** | **Join** |
+| <img src="docs/screenshots/schedule.png" width="420" alt="Schedule a meeting" /> | <img src="docs/screenshots/prejoin.png" width="420" alt="Pre-join device consent" /> |
+| **Schedule** | **Pre-join** |
+| <img src="docs/screenshots/meeting-room.png" width="860" alt="Meeting room with chat panel" /> | |
+| **Meeting room** | |
 
 ---
 
@@ -86,8 +105,15 @@ Environment variables:
   carry the same pin, but which of the three a given build image honours
   varies, so setting all three removes the ambiguity.
 - `FRONTEND_URL` — the deployed frontend origin, added to the CORS allow-list.
-- `DATABASE_URL` — optional. Defaults to SQLite, which on Render's ephemeral
-  disk resets on redeploy; point it at a managed Postgres instance to persist.
+- `DATABASE_URL` — this deployment uses
+  `sqlite:////opt/render/project/src/backend/zoom.db`, an absolute path inside
+  the project directory. Render's free tier has no persistent disk, so the
+  SQLite file lives on the instance's own filesystem: it has survived multiple
+  redeploys, but it will not survive a full instance replacement. That is
+  acceptable here because seeding is idempotent and runs on startup — the app
+  always comes back up with valid demo data. Pointing this at a managed
+  Postgres instance would make the data genuinely durable, and is the natural
+  next step rather than something required.
 
 ### Frontend (Vercel)
 
