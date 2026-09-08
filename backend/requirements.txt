@@ -1,11 +1,12 @@
-# --- Runtime ---
+# Runtime
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 SQLAlchemy==2.0.36
 pydantic==2.10.4
 python-dotenv==1.0.1
 
-# --- Testing ---
-# fastapi.testclient imports httpx at module load, so it is required to
-# exercise the API without starting a server.
+# Dev / testing only
+# fastapi.testclient imports httpx at module load; the running app does not
+# use it. NOTE: pip ignores comments, so this section is documentation only —
+# `pip install -r requirements.txt` still installs httpx.
 httpx==0.28.1

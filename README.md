@@ -31,6 +31,15 @@ python -m venv .venv
 Tables are created and seeded on first start. Interactive API docs:
 <http://127.0.0.1:8000/docs>
 
+The backend targets **Python 3.12**. `backend/.python-version` pins `3.12.5`,
+which `pyenv` picks up automatically on clone and which hosting platforms read
+to select a runtime. `backend/runtime.txt` carries the same pin in the
+`python-3.12.5` format that some build images look for instead. The pinned
+`pydantic` pulls in `pydantic-core==2.27.2`, which ships wheels up to CPython
+3.13; on anything newer pip falls back to compiling it from Rust source, which
+fails on read-only build filesystems. The app itself needs 3.10+, so the usable
+range is 3.10–3.13.
+
 ### Frontend
 
 ```bash
@@ -42,7 +51,8 @@ npm run dev
 
 Open <http://localhost:3000>.
 
-**Requirements:** Python 3.10+, Node 18+.
+**Requirements:** Python 3.12 (3.10–3.13 all work; 3.12.5 is what the deploy
+pins), Node 18+.
 
 ### Environment
 
@@ -54,6 +64,39 @@ Both packages ship a `.example` template. Defaults work for local development.
 | `backend/.env` | `FRONTEND_URL` | `http://localhost:3000` (added to CORS) |
 | `frontend/.env.local` | `NEXT_PUBLIC_API_URL` | `http://localhost:8000/api` |
 | `frontend/.env.local` | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` (invite links) |
+
+---
+
+## Deployment
+
+### Backend (Render)
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `backend` |
+| Build command | `pip install -r requirements.txt` |
+| Start command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+
+Environment variables:
+
+- **`PYTHON_VERSION=3.12.5`** — set this. Render's default runtime is newer
+  than some pinned wheels support: on Python 3.14 there is no prebuilt
+  `pydantic-core` wheel, so pip falls back to a Rust source build that fails on
+  the read-only build filesystem. `.python-version` and `runtime.txt` both
+  carry the same pin, but which of the three a given build image honours
+  varies, so setting all three removes the ambiguity.
+- `FRONTEND_URL` — the deployed frontend origin, added to the CORS allow-list.
+- `DATABASE_URL` — optional. Defaults to SQLite, which on Render's ephemeral
+  disk resets on redeploy; point it at a managed Postgres instance to persist.
+
+### Frontend (Vercel)
+
+Root directory `frontend`. Set `NEXT_PUBLIC_API_URL` to the deployed backend's
+`/api` URL and `NEXT_PUBLIC_APP_URL` to the frontend's own origin so invite
+links resolve.
+
+Serve over HTTPS. `getUserMedia` is blocked on plain HTTP outside `localhost`,
+and the pre-join screen surfaces that as its own "needs HTTPS" message.
 
 ---
 
