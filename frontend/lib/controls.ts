@@ -14,8 +14,6 @@ import {
   MonitorUp,
   MoreHorizontal,
   PhoneOff,
-  Shield,
-  Sparkles,
   Users,
   Video,
   VideoOff,
@@ -28,8 +26,6 @@ export type ControlId =
   | "chat"
   | "react"
   | "share"
-  | "hostTools"
-  | "zoomAi"
   | "more"
   | "end";
 
@@ -84,8 +80,6 @@ export const CONTROLS: ControlConfig[] = [
     hasCaret: true,
     isPlaceholder: true,
   },
-  { id: "hostTools", group: "center", label: "Host Tools", icon: Shield, isPlaceholder: true },
-  { id: "zoomAi", group: "center", label: "Zoom AI", icon: Sparkles, isPlaceholder: true },
   { id: "more", group: "center", label: "More", icon: MoreHorizontal, isPlaceholder: true },
   { id: "end", group: "end", label: "End", icon: PhoneOff },
 ];
@@ -99,8 +93,6 @@ export const PLACEHOLDER_MENUS: Partial<Record<ControlId, string[]>> = {
   share: ["Screen", "Window", "Whiteboard"],
   more: ["Settings", "Record", "Live Transcript"],
   react: ["Clap", "Thumbs Up", "Heart"],
-  hostTools: ["Suspend Participant Activities", "Lock Meeting"],
-  zoomAi: ["Meeting Summary", "Ask AI Companion"],
 };
 
 /** Side panels the participants / chat controls toggle. */
